@@ -12,3 +12,11 @@ Future<bool> isConnected(ref) async {
   final result = await connectivity.checkConnectivity();
   return !result.contains(ConnectivityResult.none);
 }
+
+@riverpod
+Stream<bool> connectivityStream(ref) {
+  final connectivity = ref.watch(connectivityProvider);
+  return connectivity.onConnectivityChanged.map(
+    (results) => !results.contains(ConnectivityResult.none),
+  );
+}

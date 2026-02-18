@@ -3,10 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kuwait_weather/features/weather/domain/entities/weather.dart';
-import 'package:kuwait_weather/features/weather/domain/entities/forecast.dart';
-import 'package:kuwait_weather/features/weather/presentation/providers/weather_providers.dart';
-import 'package:kuwait_weather/features/weather/presentation/screens/dashboard_screen.dart';
+import 'package:kuwait_weather/domain/entities/weather.dart';
+import 'package:kuwait_weather/domain/entities/forecast.dart';
+import 'package:kuwait_weather/presentation/providers/weather_providers.dart';
+import 'package:kuwait_weather/presentation/screens/dashboard_screen.dart';
+import 'package:kuwait_weather/presentation/widgets/common/weather_shimmer.dart';
 
 import '../helpers/fixtures.dart';
 
@@ -24,7 +25,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Kuwait City'), findsOneWidget);
+      expect(find.text('Kuwait City'), findsAtLeastNWidgets(1));
       expect(find.text('42°'), findsOneWidget);
       expect(find.text('Clear sky'), findsOneWidget);
     });
@@ -46,7 +47,7 @@ void main() {
       );
       await tester.pump();
 
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(WeatherShimmer), findsOneWidget);
     });
 
     testWidgets('displays error view on failure', (tester) async {

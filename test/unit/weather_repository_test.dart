@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:kuwait_weather/core/error/exceptions.dart';
-import 'package:kuwait_weather/features/weather/data/repositories/weather_repository_impl.dart';
+import 'package:kuwait_weather/data/repositories/weather_repository_impl.dart';
 
 import '../helpers/fixtures.dart';
 import '../helpers/mocks.dart';

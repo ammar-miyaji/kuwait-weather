@@ -1,7 +1,7 @@
-import 'package:kuwait_weather/features/weather/data/models/forecast_model.dart';
-import 'package:kuwait_weather/features/weather/data/models/weather_model.dart';
-import 'package:kuwait_weather/features/weather/domain/entities/forecast.dart';
-import 'package:kuwait_weather/features/weather/domain/entities/weather.dart';
+import 'package:kuwait_weather/data/models/forecast_model.dart';
+import 'package:kuwait_weather/data/models/weather_model.dart';
+import 'package:kuwait_weather/domain/entities/forecast.dart';
+import 'package:kuwait_weather/domain/entities/weather.dart';
 
 const testWeatherModel = WeatherModel(
   main: WeatherMain(temp: 42.0, feelsLike: 45.0, humidity: 20, pressure: 1013),

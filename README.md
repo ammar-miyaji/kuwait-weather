@@ -1,20 +1,21 @@
 # Kuwait Weather
 
-Offline-first weather dashboard for Kuwait, built with Flutter. Displays current conditions, 3-hour forecasts, and daily summaries using the OpenWeatherMap API. Works reliably without internet by caching data locally.
+Offline-first weather dashboard built with Flutter. Displays current conditions, 3-hour forecasts, and daily summaries for any city worldwide using the OpenWeatherMap API. Works reliably without internet by caching data locally.
 
 ## Features
 
-- **Current weather** — temperature, feels-like, humidity, wind speed, pressure
-- **3-hour forecast** — scrollable list with 5-day/3-hour intervals
+- **Current weather** — temperature, feels-like, humidity, wind speed, pressure with gradient weather cards
+- **3-hour forecast** — scrollable list with 5-day/3-hour intervals and staggered animations
 - **Daily forecast** — aggregated min/max temperatures per day
-- **Location selection** — choose from 16 Kuwait areas
-- **Offline-first** — cached data displayed when offline, with "Last updated" banner
+- **Worldwide location** — search any city worldwide with recent cities history
+- **Offline-first** — cached data displayed when offline, connectivity banner, auto-refresh on reconnect
 - **Pull-to-refresh** — manual refresh of weather data
-- **Settings** — temperature units, cache management
+- **Smooth animations** — entrance animations, shimmer loading skeletons, page transitions
+- **Settings** — temperature units (metric/imperial), cache management
 
 ## Architecture
 
-This project follows **Clean Architecture** with three layers per feature:
+This project follows **Clean Architecture** with a layer-first structure:
 
 ```
 presentation → domain ← data
@@ -43,6 +44,8 @@ presentation → domain ← data
 4. On fetch success, update cache and display
 5. On fetch failure, fall back to stale cache (if available)
 6. Display "Last updated: X min ago" banner when showing cached data
+7. Show connectivity banner when offline ("Offline — Showing cached data")
+8. Auto-refresh weather data when connectivity is restored
 
 ## Setup
 
@@ -82,24 +85,33 @@ Tests include:
 ```
 lib/
 ├── main.dart                          # Entry point, Hive init, ProviderScope
-├── app.dart                           # MaterialApp.router, GoRouter, theme
+├── app.dart                           # MaterialApp.router setup
+├── config/
+│   ├── routes/app_router.dart         # GoRouter configuration
+│   └── theme/app_theme.dart           # Theme + weather gradients
 ├── core/
-│   ├── constants/api_constants.dart    # API URLs, cache duration
+│   ├── api/dio_client.dart            # Dio HTTP client provider
+│   ├── constants/api_constants.dart   # API URLs, cache duration
 │   ├── error/                         # Exception and Failure types
-│   ├── network/                       # Dio client, connectivity provider
-│   ├── providers/                     # Hive box providers
-│   └── theme/                         # App theme
-├── features/
-│   ├── weather/
-│   │   ├── data/datasources/          # Remote (Dio) + Local (Hive)
-│   │   ├── data/models/               # API DTOs (freezed + json)
-│   │   ├── data/repositories/         # WeatherRepositoryImpl
-│   │   ├── domain/entities/           # Weather, Forecast (freezed)
-│   │   ├── domain/repositories/       # Abstract WeatherRepository
-│   │   └── presentation/             # Screens, widgets, providers
-│   ├── location/                      # Kuwait city selection
-│   └── settings/                      # Units, cache management
-└── shared/widgets/                    # ErrorView, LoadingIndicator
+│   ├── network/                       # Connectivity provider (stream-based)
+│   └── services/hive_service.dart     # Hive box providers
+├── data/
+│   ├── datasources/                   # Remote (Dio) + Local (Hive)
+│   ├── models/                        # API DTOs (freezed + json)
+│   └── repositories/                  # WeatherRepositoryImpl
+├── domain/
+│   ├── entities/                      # Weather, Forecast (freezed)
+│   └── repositories/                  # Abstract WeatherRepository
+└── presentation/
+    ├── providers/                     # Weather, location, settings providers
+    ├── screens/                       # Dashboard, forecasts, location, settings, splash
+    └── widgets/
+        ├── common/                    # ErrorView, LoadingIndicator, WeatherShimmer, ConnectivityBanner
+        ├── current_weather_card.dart  # Gradient weather card
+        ├── daily_forecast_tile.dart   # Daily forecast list item
+        ├── hourly_forecast_tile.dart  # Hourly forecast item
+        ├── last_updated_banner.dart   # Cache age indicator
+        └── weather_info_tile.dart     # Weather detail tile
 ```
 
 ## Tech Stack
@@ -112,4 +124,6 @@ lib/
 | Cache | Hive |
 | Models | Freezed + json_serializable |
 | Navigation | GoRouter |
+| Animations | animate_do + shimmer |
+| Connectivity | connectivity_plus |
 | Testing | flutter_test + mocktail |
