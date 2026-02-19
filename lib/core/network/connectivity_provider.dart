@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -10,13 +12,27 @@ Connectivity connectivity(ref) => Connectivity();
 Future<bool> isConnected(ref) async {
   final connectivity = ref.watch(connectivityProvider);
   final result = await connectivity.checkConnectivity();
-  return !result.contains(ConnectivityResult.none);
+  return _isOnline(result);
 }
 
 @riverpod
-Stream<bool> connectivityStream(ref) {
+Stream<bool> connectivityStream(ref) async* {
   final connectivity = ref.watch(connectivityProvider);
-  return connectivity.onConnectivityChanged.map(
-    (results) => !results.contains(ConnectivityResult.none),
-  );
+
+  // Emit current state first
+  final current = await connectivity.checkConnectivity();
+  yield _isOnline(current);
+
+  // Then emit on every change
+  await for (final results in connectivity.onConnectivityChanged) {
+    yield _isOnline(results);
+  }
+}
+
+bool _isOnline(List<ConnectivityResult> results) {
+  return results.any((r) =>
+      r == ConnectivityResult.wifi ||
+      r == ConnectivityResult.mobile ||
+      r == ConnectivityResult.ethernet ||
+      r == ConnectivityResult.vpn);
 }

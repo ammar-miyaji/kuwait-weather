@@ -48,6 +48,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               );
               if (confirmed == true) {
+                await ref.read(localDataSourceProvider).clearAll();
                 ref.invalidate(currentWeatherProvider);
                 ref.invalidate(forecastProvider);
                 if (context.mounted) {
@@ -62,7 +63,7 @@ class SettingsScreen extends ConsumerWidget {
           const ListTile(
             leading: Icon(Icons.info_outline),
             title: Text('About'),
-            subtitle: Text('Kuwait Weather v1.0.0\nPowered by OpenWeatherMap'),
+            subtitle: Text('Kuwait Weather v1.0.0'),
           ),
         ],
       ),

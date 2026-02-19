@@ -61,3 +61,50 @@ final testForecasts = [
     windSpeed: 3.5,
   ),
 ];
+
+/// Raw JSON matching OpenWeatherMap /weather API response
+const testWeatherJson = <String, dynamic>{
+  'main': {
+    'temp': 42.0,
+    'feels_like': 45.0,
+    'humidity': 20,
+    'pressure': 1013,
+  },
+  'weather': [
+    {'main': 'Clear', 'description': 'clear sky', 'icon': '01d'},
+  ],
+  'wind': {'speed': 5.5},
+  'name': 'Kuwait City',
+};
+
+/// Raw JSON matching OpenWeatherMap /forecast API response
+const testForecastJson = <String, dynamic>{
+  'list': [
+    {
+      'dt': 1739800800,
+      'main': {
+        'temp': 38.0,
+        'feels_like': 40.0,
+        'humidity': 25,
+        'pressure': 1012,
+      },
+      'weather': [
+        {'main': 'Clouds', 'description': 'few clouds', 'icon': '02d'},
+      ],
+      'wind': {'speed': 4.0},
+    },
+    {
+      'dt': 1739811600,
+      'main': {
+        'temp': 35.0,
+        'feels_like': 37.0,
+        'humidity': 30,
+        'pressure': 1011,
+      },
+      'weather': [
+        {'main': 'Clear', 'description': 'clear sky', 'icon': '01n'},
+      ],
+      'wind': {'speed': 3.5},
+    },
+  ],
+};

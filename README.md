@@ -65,9 +65,18 @@ presentation → domain ← data
 ```bash
 git clone <repo-url>
 cd kuwait_weather
+
+# Install dependencies
 flutter pub get
+
+# Generate freezed/json/riverpod code
 dart run build_runner build --delete-conflicting-outputs
-flutter run --dart-define=OWM_API_KEY=your_api_key_here
+
+# Create .env file with your API key
+echo "OWM_API_KEY=your_api_key_here" > .env
+
+# Run the app
+flutter run
 ```
 
 ### Test
@@ -76,9 +85,12 @@ flutter run --dart-define=OWM_API_KEY=your_api_key_here
 flutter test
 ```
 
-Tests include:
+**20 tests** across unit and widget layers:
+
 - **6 unit tests** — `WeatherRepositoryImpl` with mocked data sources (cache hit, cache miss, stale fallback, network failure)
+- **7 unit tests** — `WeatherRemoteDataSource` with mocked Dio HTTP responses (successful API responses, 404/500 errors, timeouts, entity conversion)
 - **3 widget tests** — `DashboardScreen` with provider overrides (data loaded, loading state, error state)
+- **4 widget tests** — `ConnectivityBanner` with overridden providers (online, offline, dynamic transition, loading default)
 
 ## Project Structure
 
@@ -106,7 +118,7 @@ lib/
     ├── providers/                     # Weather, location, settings providers
     ├── screens/                       # Dashboard, forecasts, location, settings, splash
     └── widgets/
-        ├── common/                    # ErrorView, LoadingIndicator, WeatherShimmer, ConnectivityBanner
+        ├── common/                    # ErrorView, LoadingIndicator, WeatherShimmer, ConnectivityBanner, WeatherIcon
         ├── current_weather_card.dart  # Gradient weather card
         ├── daily_forecast_tile.dart   # Daily forecast list item
         ├── hourly_forecast_tile.dart  # Hourly forecast item

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:kuwait_weather/core/constants/api_constants.dart';
 import 'package:kuwait_weather/domain/entities/forecast.dart';
+import 'package:kuwait_weather/presentation/widgets/common/weather_icon.dart';
 
 class DailyForecastTile extends StatelessWidget {
   final String dayLabel;
@@ -20,14 +20,9 @@ class DailyForecastTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return ListTile(
-      leading: Image.network(
-        ApiConstants.iconUrl(forecast.iconCode),
-        width: 40,
-        height: 40,
-        cacheWidth: 80,
-        cacheHeight: 80,
-        gaplessPlayback: true,
-        errorBuilder: (_, __, ___) => const Icon(Icons.cloud, size: 40),
+      leading: WeatherIcon(
+        iconCode: forecast.iconCode,
+        size: 40,
       ),
       title: Text(dayLabel),
       subtitle: Text(

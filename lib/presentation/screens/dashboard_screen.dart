@@ -2,13 +2,17 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:kuwait_weather/core/network/connectivity_provider.dart';
+import 'package:kuwait_weather/domain/entities/forecast.dart';
 import 'package:kuwait_weather/presentation/providers/location_providers.dart';
+import 'package:kuwait_weather/presentation/providers/settings_providers.dart';
 import 'package:kuwait_weather/presentation/providers/weather_providers.dart';
 import 'package:kuwait_weather/presentation/widgets/common/connectivity_banner.dart';
 import 'package:kuwait_weather/presentation/widgets/common/error_view.dart';
 import 'package:kuwait_weather/presentation/widgets/common/weather_shimmer.dart';
 import 'package:kuwait_weather/presentation/widgets/current_weather_card.dart';
+import 'package:kuwait_weather/presentation/widgets/daily_forecast_tile.dart';
 import 'package:kuwait_weather/presentation/widgets/hourly_forecast_tile.dart';
 import 'package:kuwait_weather/presentation/widgets/last_updated_banner.dart';
 import 'package:kuwait_weather/presentation/widgets/weather_info_tile.dart';
@@ -21,26 +25,34 @@ class DashboardScreen extends ConsumerWidget {
     final weatherAsync = ref.watch(currentWeatherProvider);
     final forecastAsync = ref.watch(forecastProvider);
     final cityName = ref.watch(selectedCityProvider);
+    final units = ref.watch(temperatureUnitsProvider);
 
-    // Auto-refresh when coming back online
+    // Keep banner in sync with connectivity changes
     ref.listen<AsyncValue<bool>>(connectivityStreamProvider, (prev, next) {
-      next.whenData((isOnline) {
-        final wasOffline = prev?.valueOrNull == false;
-        if (isOnline && wasOffline) {
-          ref.invalidate(currentWeatherProvider);
-          ref.invalidate(forecastProvider);
-        }
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).clearSnackBars();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(isOnline ? 'Back online' : 'You are offline'),
-              duration: const Duration(seconds: 2),
-              backgroundColor: isOnline ? Colors.green : Colors.orange,
-            ),
-          );
-        }
-      });
+      final nextOnline = next.valueOrNull;
+      if (nextOnline == null) return;
+
+      // Always refresh the banner's provider on any connectivity event
+      ref.invalidate(isConnectedProvider);
+
+      final prevOnline = prev?.valueOrNull;
+      // Only show snackbar + auto-refresh on actual transitions
+      if (prevOnline == null || prevOnline == nextOnline) return;
+
+      if (nextOnline && !prevOnline) {
+        ref.invalidate(currentWeatherProvider);
+        ref.invalidate(forecastProvider);
+      }
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(nextOnline ? 'Back online' : 'You are offline'),
+            duration: const Duration(seconds: 2),
+            backgroundColor: nextOnline ? Colors.green : Colors.orange,
+          ),
+        );
+      }
     });
 
     return Scaffold(
@@ -73,7 +85,7 @@ class DashboardScreen extends ConsumerWidget {
                     duration: const Duration(milliseconds: 600),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
-                      child: CurrentWeatherCard(weather: weather),
+                      child: CurrentWeatherCard(weather: weather, units: units),
                     ),
                   ),
                   SlideInUp(
@@ -172,6 +184,7 @@ class DashboardScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
+                    ..._buildDailyPreview(forecasts),
                   ],
                 ),
               ),
@@ -182,5 +195,48 @@ class DashboardScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  List<Widget> _buildDailyPreview(List<Forecast> forecasts) {
+    final Map<String, List<Forecast>> groups = {};
+    for (final forecast in forecasts) {
+      final key = DateFormat('yyyy-MM-dd').format(forecast.dateTime);
+      groups.putIfAbsent(key, () => []).add(forecast);
+    }
+
+    return groups.entries.take(5).map((entry) {
+      final dayForecasts = entry.value;
+      final tempMin = dayForecasts
+          .map((f) => f.temperature)
+          .reduce((a, b) => a < b ? a : b);
+      final tempMax = dayForecasts
+          .map((f) => f.temperature)
+          .reduce((a, b) => a > b ? a : b);
+      final representative = dayForecasts.reduce((a, b) {
+        final aDiff = (a.dateTime.hour - 12).abs();
+        final bDiff = (b.dateTime.hour - 12).abs();
+        return aDiff <= bDiff ? a : b;
+      });
+
+      final date = DateTime.parse(entry.key);
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final tomorrow = today.add(const Duration(days: 1));
+      String dayLabel;
+      if (date == today) {
+        dayLabel = 'Today';
+      } else if (date == tomorrow) {
+        dayLabel = 'Tomorrow';
+      } else {
+        dayLabel = DateFormat('EEEE, MMM d').format(date);
+      }
+
+      return DailyForecastTile(
+        dayLabel: dayLabel,
+        forecast: representative,
+        tempMin: tempMin,
+        tempMax: tempMax,
+      );
+    }).toList();
   }
 }

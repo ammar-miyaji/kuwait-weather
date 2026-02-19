@@ -22,12 +22,12 @@ class WeatherRepositoryImpl implements WeatherRepository {
   Future<Weather> getCurrentWeather(String city,
       {String units = 'metric'}) async {
     // Check if cache is fresh
-    final timestamp = await _local.getWeatherTimestamp(city);
+    final timestamp = await _local.getWeatherTimestamp(city, units: units);
     if (timestamp != null) {
       final age = DateTime.now().difference(timestamp);
       if (age < ApiConstants.cacheStaleDuration) {
         try {
-          final cached = await _local.getCachedWeather(city);
+          final cached = await _local.getCachedWeather(city, units: units);
           return cached.toEntity().copyWith(lastUpdated: timestamp);
         } on CacheException {
           // Cache read failed, continue to remote
@@ -38,12 +38,12 @@ class WeatherRepositoryImpl implements WeatherRepository {
     // Try remote
     try {
       final model = await _remote.fetchCurrentWeather(city, units);
-      await _local.cacheWeather(city, model);
+      await _local.cacheWeather(city, model, units: units);
       return model.toEntity();
     } on ServerException {
       // Remote failed, try stale cache
       try {
-        final cached = await _local.getCachedWeather(city);
+        final cached = await _local.getCachedWeather(city, units: units);
         return cached
             .toEntity()
             .copyWith(lastUpdated: timestamp ?? DateTime.now());
@@ -58,11 +58,11 @@ class WeatherRepositoryImpl implements WeatherRepository {
       {String units = 'metric'}) async {
     try {
       final response = await _remote.fetchForecast(city, units);
-      await _local.cacheForecast(city, response.list);
+      await _local.cacheForecast(city, response.list, units: units);
       return response.list.map((e) => e.toEntity()).toList();
     } on ServerException {
       try {
-        final cached = await _local.getCachedForecast(city);
+        final cached = await _local.getCachedForecast(city, units: units);
         return cached.map((e) => e.toEntity()).toList();
       } on CacheException {
         rethrow;

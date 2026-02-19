@@ -26,7 +26,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Kuwait City'), findsAtLeastNWidgets(1));
-      expect(find.text('42°'), findsOneWidget);
+      expect(find.text('42°C'), findsOneWidget);
       expect(find.text('Clear sky'), findsOneWidget);
     });
 

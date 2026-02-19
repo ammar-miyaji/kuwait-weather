@@ -23,7 +23,7 @@ final connectivityProvider = AutoDisposeProvider<Connectivity>.internal(
 @Deprecated('Will be removed in 3.0. Use Ref instead')
 // ignore: unused_element
 typedef ConnectivityRef = AutoDisposeProviderRef<Connectivity>;
-String _$isConnectedHash() => r'43873dcf3b148d528c9ffffa117bf075dad024b4';
+String _$isConnectedHash() => r'3da057d07f8d72c17b39ea569c90deb54e95410c';
 
 /// See also [isConnected].
 @ProviderFor(isConnected)
@@ -41,7 +41,7 @@ final isConnectedProvider = AutoDisposeFutureProvider<bool>.internal(
 // ignore: unused_element
 typedef IsConnectedRef = AutoDisposeFutureProviderRef<bool>;
 String _$connectivityStreamHash() =>
-    r'61f57f69f9561d717c1b3264fe145fc55e4adff8';
+    r'4973dacbb4f01989b2d0b82790c8b1731a910801';
 
 /// See also [connectivityStream].
 @ProviderFor(connectivityStream)

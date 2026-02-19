@@ -7,29 +7,50 @@ class ConnectivityBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final connectivityAsync = ref.watch(connectivityStreamProvider);
+    // Watch both: initial check + live stream updates
+    final initialOnline = ref.watch(isConnectedProvider).valueOrNull;
+    final streamOnline = ref.watch(connectivityStreamProvider).valueOrNull;
 
-    return connectivityAsync.when(
-      data: (isOnline) => isOnline
+    // Stream takes priority when available, fall back to initial check,
+    // default to true (online) while still loading
+    final isOnline = streamOnline ?? initialOnline ?? true;
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      child: isOnline
           ? const SizedBox.shrink()
           : Container(
+              key: const ValueKey('offline-banner'),
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 16),
-              color: Colors.orange.shade700,
+              padding:
+                  const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade700,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.orange.shade900.withValues(alpha: 0.3),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.wifi_off, size: 16, color: Colors.white),
+                  Icon(Icons.wifi_off_rounded,
+                      size: 18, color: Colors.white),
                   SizedBox(width: 8),
                   Text(
-                    'Offline — Showing cached data',
-                    style: TextStyle(color: Colors.white, fontSize: 12),
+                    'No internet connection',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),
             ),
-      loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
     );
   }
 }

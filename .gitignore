@@ -10,6 +10,7 @@
 .history
 .svn/
 .swiftpm/
+.claude/
 migrate_working_dir/
 
 # IntelliJ related
@@ -47,10 +48,6 @@ app.*.map.json
 # Environment / secrets
 .env
 *.env
-
-# Claude Code
-CLAUDE.md
-.claude/
 
 # Note: *.g.dart and *.freezed.dart are committed for easier cloning.
 # Re-generate with: dart run build_runner build --delete-conflicting-outputs

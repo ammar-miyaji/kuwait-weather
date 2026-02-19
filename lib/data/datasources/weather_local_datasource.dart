@@ -15,8 +15,8 @@ class WeatherLocalDataSource {
   })  : _weatherBox = weatherBox,
         _forecastBox = forecastBox;
 
-  Future<WeatherModel> getCachedWeather(String city) async {
-    final key = _cacheKey(city);
+  Future<WeatherModel> getCachedWeather(String city, {String units = 'metric'}) async {
+    final key = _cacheKey(city, units);
     final data = _weatherBox.get(key);
     if (data == null) {
       throw const CacheException(message: 'No cached weather data');
@@ -25,21 +25,21 @@ class WeatherLocalDataSource {
         Map<String, dynamic>.from(jsonDecode(data as String)));
   }
 
-  Future<void> cacheWeather(String city, WeatherModel model) async {
-    final key = _cacheKey(city);
+  Future<void> cacheWeather(String city, WeatherModel model, {String units = 'metric'}) async {
+    final key = _cacheKey(city, units);
     await _weatherBox.put(key, jsonEncode(model.toJson()));
     await _weatherBox.put('${key}_timestamp', DateTime.now().toIso8601String());
   }
 
-  Future<DateTime?> getWeatherTimestamp(String city) async {
-    final key = _cacheKey(city);
+  Future<DateTime?> getWeatherTimestamp(String city, {String units = 'metric'}) async {
+    final key = _cacheKey(city, units);
     final timestamp = _weatherBox.get('${key}_timestamp');
     if (timestamp == null) return null;
     return DateTime.parse(timestamp as String);
   }
 
-  Future<List<ForecastItem>> getCachedForecast(String city) async {
-    final key = _cacheKey(city);
+  Future<List<ForecastItem>> getCachedForecast(String city, {String units = 'metric'}) async {
+    final key = _cacheKey(city, units);
     final data = _forecastBox.get(key);
     if (data == null) {
       throw const CacheException(message: 'No cached forecast data');
@@ -50,8 +50,8 @@ class WeatherLocalDataSource {
         .toList();
   }
 
-  Future<void> cacheForecast(String city, List<ForecastItem> items) async {
-    final key = _cacheKey(city);
+  Future<void> cacheForecast(String city, List<ForecastItem> items, {String units = 'metric'}) async {
+    final key = _cacheKey(city, units);
     await _forecastBox.put(
         key, jsonEncode(items.map((e) => e.toJson()).toList()));
   }
@@ -61,5 +61,6 @@ class WeatherLocalDataSource {
     await _forecastBox.clear();
   }
 
-  String _cacheKey(String city) => city.toLowerCase().replaceAll(' ', '_');
+  String _cacheKey(String city, [String units = 'metric']) =>
+      '${city.toLowerCase().replaceAll(' ', '_')}_$units';
 }
